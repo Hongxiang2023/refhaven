@@ -1,6 +1,6 @@
 # Refhaven Connector privacy
 
-Refhaven Connector reads the active article page only when you open its popup. It extracts citation metadata and a possible PDF URL so you can decide whether to save them. It does not collect browsing history or run on pages in the background.
+Refhaven Connector reads the active article page only when you open its popup. It extracts citation metadata, including author names, the article title, the selected page URL, and a possible PDF URL so you can decide whether to save them. These are processed as website content; names may be personal information, and saved page URLs form a list of the papers you chose to collect. It does not monitor browsing history or run on pages in the background.
 
 Choosing **Save reference** sends the metadata and the page URL to Refhaven running at `127.0.0.1:47821` on your computer. Choosing **Attach available PDF** downloads the PDF through your browser session and sends its bytes to that same local app. The connector does not send library content to a Refhaven cloud service. Publisher or institutional servers may receive the normal browser request needed to access a PDF.
 
