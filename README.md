@@ -30,6 +30,8 @@
 
 No Refhaven account, subscription, or analytics. Your library is local by default; cloud-folder storage is optional. Identifier lookup and optional AI use external services for their respective tasks. AI uses your own connection and requires per-paper enablement. [Privacy & security](SECURITY.md)
 
+**Browser connector:** Version 0.1.4 is pending Chrome Web Store review as of September 19, 2026, so Store installation is not available yet. You can [set up the unpacked Chrome/Edge connector](docs/user-guide.md#save-papers-with-the-browser-connector) now. Its folder survives app replacement; Chrome Store installation will provide browser-managed updates after approval. Edge Add-ons has not been submitted.
+
 ## Download & install
 
 **[Download Refhaven for Mac · Apple silicon (.dmg)](https://github.com/Hongxiang2023/refhaven/releases/download/v0.1.4-preview.1/Refhaven-0.1.4-arm64.dmg)**
@@ -79,7 +81,7 @@ To change a citation’s sources during revision, replace its entire citation co
 | --- | --- |
 | Try the real app with fictional papers | [Hands-on demo & sample files](docs/demo.md) |
 | Read, highlight, and add notes | [Reading guide](docs/user-guide.md#read-pdfs-and-create-reading-views) |
-| Capture a paper from my browser | [Chrome/Edge connector setup](docs/user-guide.md#save-papers-with-the-browser-connector) |
+| Capture a paper from my browser | [Connector status and Chrome/Edge setup](docs/user-guide.md#save-papers-with-the-browser-connector) |
 | Save local disk space | [Cloud-folder guide](docs/user-guide.md#use-a-cloud-provider-folder) |
 | Back up or restore my library | [Backup & restore](docs/user-guide.md#back-up-restore-and-move-your-library) |
 | Use my own AI connection | [Optional paper chat](docs/user-guide.md#ask-a-paper-with-optional-ai) |

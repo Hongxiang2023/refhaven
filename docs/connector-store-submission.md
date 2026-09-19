@@ -1,4 +1,6 @@
-# Browser store submission draft
+# Browser store submission
+
+Chrome Web Store item `ijpjnopkleehgbhflkkeiajhamehpghk` (Refhaven Connector 0.1.4) was submitted for review on September 19, 2026. It is pending review, with automatic publication after approval enabled. The Store listing is not yet available for installation. Edge Add-ons has not been submitted.
 
 Refhaven Connector is a Manifest V3 extension for Chrome and Edge. Build the upload archive with `npm run package:connector`. Submit that ZIP through the browser store developer dashboard. The ZIP contains only the extension code and icons; it contains no library files or pairing keys.
 
@@ -29,7 +31,7 @@ Refhaven Connector is a Manifest V3 extension for Chrome and Edge. Build the upl
 
 1. Install the packaged ZIP in a test Chrome and Edge profile and verify pairing, reference save, PDF permission and PDF failure behavior.
 2. Prepare store screenshots and account ownership details; check the store privacy and permissions forms against `connector-privacy.md`.
-3. Submit from the owner's Chrome Web Store and Edge Add-ons developer accounts. Keep store publication and public listing under owner approval.
-4. After approval, replace the unpacked setup instructions with the store links. An unpacked installation and a store installation have different browser IDs, so users must pair the store version once and remove the old browser entry.
+3. Submit from the owner's Chrome Web Store and Edge Add-ons developer accounts. Chrome submission is complete; Edge remains a future step.
+4. After Chrome approval, add the live Store link to the app, README, and guide. An unpacked installation and a Store installation have different browser IDs, so users must pair the Store version once and remove the old browser entry after confirming it works.
 
 Store submission and review are external actions and are not performed by the source build.
