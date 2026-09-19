@@ -20,7 +20,7 @@ export async function parsePdf(pdfId:string,signal:AbortSignal,onProgress:(messa
  }
  try{
   check();const doc=await cancellable(task.promise);if(doc.numPages>500)throw Error('This PDF has more than 500 pages. Use the original PDF viewer for this document.');
-  const result:ReadingCache={version:1,layoutVersion:15,pages:[],figures:[],warnings:['Text order and figure captions are estimated from the PDF. Figure boundaries are estimated; the original PDF remains available.']};
+  const result:ReadingCache={version:1,layoutVersion:16,pages:[],figures:[],warnings:['Text order and figure captions are estimated from the PDF. Figure boundaries are estimated; the original PDF remains available.']};
   // A sparse title/table page may not contain enough prose to expose all
   // gutters. Sample text layers only; two agreeing dense pages establish an
   // advisory three-column layout for other pages with narrow-column evidence.

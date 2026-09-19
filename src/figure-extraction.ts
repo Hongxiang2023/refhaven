@@ -59,9 +59,9 @@ export function extractFigureContent(items:Item[],width:number,height:number,sty
   // A short figure reference may start a wrapped body line. A preceding
   // same-size prose line is evidence that it is not a standalone legend.
   const bold=styles[i.fontName||'']?.bold||/(?:bold|\.B$)/i.test(styles[i.fontName||'']?.fontName||'');
-  if(/^Fig(?:ure)?\.?\s/i.test(i.str.trim())&&!bold&&!/HardingText/i.test(styles[i.fontName||'']?.fontName||'')){
+  if(/^Fig(?:ure)?\.?\s/i.test(i.str.trim())&&!bold){
    const size=Math.abs(i.height);
-   if(items.some(p=>p!==i&&p.str.trim().length>35&&Math.abs(p.height-size)<.25&&p.fontName===i.fontName&&Math.abs(p.transform[4]-i.transform[4])<size*2&&p.transform[5]-i.transform[5]>size*.7&&p.transform[5]-i.transform[5]<size*1.6))return false;
+   if(items.some(p=>p!==i&&p.str.trim().length>35&&Math.abs(p.height-size)<.25&&p.fontName===i.fontName&&Math.abs(p.transform[4]-i.transform[4])<size*2&&p.transform[5]-i.transform[5]>size*.7&&p.transform[5]-i.transform[5]<size*1.6&&!/[.!?]$/.test(p.str.trim())))return false;
   }
   return true;
  });

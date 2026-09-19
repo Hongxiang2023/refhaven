@@ -99,6 +99,11 @@ test('a wrapped body reference beginning Fig. remains ordinary article text',()=
  const items=[item('We have three major observations from Table 2 and',321,214,10,'body',240),item('Fig. 4. First, the situation is reversed with residual learning.',309,202,10,'body',240),item('The deeper model performs better on this experiment.',309,190,10,'body',240)];
  const r=extractFigureContent(items,612,792,{body:{fontName:'NimbusRomNo9L-Regu'}},5);assert.equal(r.figures.length,0);assert.deepEqual(r.items,items);
 });
+test('Nature body text beginning with Fig. 4 stays in the main text',()=>{
+ const items=[item('The tissue measurements were compared with',309,214,9,'body',245),item('Fig. 4. The same spatial pattern persists across samples.',309,203,9,'body',245),item('Additional observations support this interpretation.',309,192,9,'body',245)];
+ const r=extractFigureContent(items,612,792,{body:{fontName:'HardingText-Regular'}},5);
+ assert.equal(r.figures.length,0);assert.deepEqual(r.items,items);
+});
 test('bold unpunctuated labels and split label numbers recover publisher legends',()=>{
  const s={bold:{fontName:'MyriadPro-Bold'},body:{fontName:'MyriadPro-Light'}};
  for(const label of [[item('Figure 1',60,500,8,'bold',30)],[item('Fig.',60,500,8,'bold',13),item('1',75,500,8,'bold',5)]]){
