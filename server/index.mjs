@@ -10,6 +10,7 @@ import {streamBackup} from './archive.mjs';
 import { createReadStream } from 'node:fs';
 import { mkdir, open, readFile, readdir, rename, rm, stat, statfs } from 'node:fs/promises';
 import {installConnector} from './connector-install.mjs';
+import {createNotesFiles} from './notes-files.mjs';
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { homedir } from 'node:os';
 import path from 'node:path';
@@ -69,6 +70,7 @@ export async function createFolioServer({ dataDir = defaultDataDir(), localDataD
   const readingCache=readingCacheStore(localDataDir);
   const citationStyles=await createCitationStyles({dataDir,...(styleFetch?{fetchImpl:styleFetch}:{})});
   const libraryPath = path.join(dataDir, 'library.json');
+  const noteFiles=await createNotesFiles(dataDir);
   const tokenPath = path.join(localDataDir, 'connector-token');
   let token;
   try { token = (await readFile(tokenPath, 'utf8')).trim(); } catch (e) { if (e.code !== 'ENOENT') throw e; token = randomBytes(32).toString('hex'); const f = await open(tokenPath, 'wx', 0o600); try { await f.writeFile(token); await f.sync(); } finally { await f.close(); } }
@@ -85,8 +87,9 @@ export async function createFolioServer({ dataDir = defaultDataDir(), localDataD
   async function assertExternalUnchanged(){
     if(externalLibrary){let current;try{current=await readFile(libraryPath,'utf8');}catch{throw fail(409,'The library folder is unavailable. Start your cloud drive and reopen Refhaven.');}if(current!==diskSnapshot)throw fail(409,'The library changed outside Refhaven. Quit Refhaven, wait for cloud sync, then reopen it before saving.');}
   }
-  async function persist(papers, collections = library.collections) {
+  async function persist(papers, collections = library.collections, {skipNotes=false} = {}) {
     await assertExternalUnchanged();
+    if(!skipNotes)await noteFiles.writeChanges(library.papers,papers);
     const next={papers,collections:[...new Set([...collections,...papers.map(p=>p.collection)])],revision:library.revision+1};const temp=`${libraryPath}.${randomUUID()}.tmp`;
     try {
       const file=await open(temp,'wx',0o600);try{await file.writeFile(JSON.stringify(next,null,2));await file.sync();}finally{await file.close();}
@@ -94,6 +97,11 @@ export async function createFolioServer({ dataDir = defaultDataDir(), localDataD
       if(process.platform!=='win32'){let dir;try{dir=await open(dataDir,'r');await dir.sync();}catch(e){if(!['EINVAL','ENOTSUP','EBADF','EISDIR','EPERM'].includes(e.code))throw e;}finally{await dir?.close();}}
       return next;
     } finally {await rm(temp,{force:true});}
+  }
+  async function syncExternalNotes({readOnly=false}={}){
+    try{await assertExternalUnchanged();}catch(e){if(readOnly&&e.status===409)return;throw e;}
+    const papers=await noteFiles.sync(library.papers);
+    if(papers)await persist(papers,library.collections,{skipNotes:true});
   }
   async function validatePaper(p) { if(p)validateCitationFields(p); const strings = ['id', 'title', 'authors', 'year', 'journal', 'doi', 'collection', 'tags', 'status', 'notes']; if (!p || strings.some(k => typeof p[k] !== 'string') || !p.id || !p.title.trim() || !p.collection.trim() || typeof p.starred !== 'boolean' || !['To read', 'Reading', 'Finished'].includes(p.status)) throw fail(400, 'Invalid paper record.'); for (const key of ['sourceUrl', 'pdfUrl']) if (p[key]) webUrl(p[key]); if (p.pdfName !== undefined && typeof p.pdfName !== 'string') throw fail(400, 'Invalid PDF filename.'); if (p.pdfId !== undefined) { if (!uuid.test(p.pdfId)) throw fail(400, 'Invalid PDF ID.'); try { await stat(path.join(dataDir, 'pdfs', `${p.pdfId}.pdf`)); } catch { throw fail(400, 'Attached PDF does not exist.'); } } }
   for(const p of library.papers){if(p)validateCitationFields(p);if(!p||['id','title','authors','year','journal','doi','collection','tags','status','notes'].some(k=>typeof p[k]!=='string')||!p.title.trim()||!p.collection.trim()||typeof p.starred!=='boolean'||!['To read','Reading','Finished'].includes(p.status)||(p.pdfId!==undefined&&!uuid.test(p.pdfId)))throw Error('Invalid library record; restore a backup.');for(const key of ['sourceUrl','pdfUrl'])if(p[key])webUrl(p[key]);}
@@ -120,7 +128,7 @@ export async function createFolioServer({ dataDir = defaultDataDir(), localDataD
         if (url.pathname === '/api/session' && req.method === 'GET') {
           if (extension || (req.headers['sec-fetch-site'] && !['same-origin', 'none'].includes(req.headers['sec-fetch-site']))) throw fail(403, 'Open Refhaven directly to pair the connector.');
           res.setHeader('Set-Cookie', `folio_session=${token}; HttpOnly; SameSite=Strict; Path=/`);
-          return send(res, 200, { token, dataDir, extensionDir:installedExtensionDir });
+          return send(res, 200, { token, dataDir, notesDir:noteFiles.dir, extensionDir:installedExtensionDir });
         }
         if(relocating)throw fail(503,'Refhaven is moving the library. Wait for it to reopen.');
         const cookie = req.headers.cookie?.split(';').map(x => x.trim()).find(x => x.startsWith('folio_session='))?.slice(14);
@@ -191,10 +199,11 @@ export async function createFolioServer({ dataDir = defaultDataDir(), localDataD
           if(url.pathname==='/api/word/generate'){const output=await generateDocx(buffer,papers,style,citationStyles.options(style));if(output.unresolved.length)throw fail(400,'Resolve all identifiers before exporting Word.');res.writeHead(200,{'Content-Type':'application/vnd.openxmlformats-officedocument.wordprocessingml.document','Content-Disposition':'attachment; filename="folio-manuscript.docx"','Cache-Control':'no-store'});res.end(output.buffer);return;}
         }
         if(url.pathname==='/api/storage'&&req.method==='GET')return send(res,200,await exclusive(storageStats));
-        if(url.pathname==='/api/backup'&&req.method==='GET')return await exclusive(()=>streamBackup(res,library,dataDir,localDataDir));
+        if(url.pathname==='/api/backup'&&req.method==='GET')return await exclusive(async()=>{await syncExternalNotes();return streamBackup(res,library,dataDir,localDataDir);});
         if (url.pathname === '/api/collections' && req.method === 'POST') {
           const body = await jsonBody(req);
           return send(res, 200, await exclusive(async () => {
+            await syncExternalNotes();
             const name = typeof body.name === 'string' ? body.name.trim() : '';
             if (!name || name.length > 200 || name === 'Unfiled') throw fail(400, 'Use a collection name of 1–200 characters. Unfiled is reserved.');
             if (!['create','rename','delete'].includes(body.action)) throw fail(400, 'Unknown collection action.');
@@ -207,8 +216,8 @@ export async function createFolioServer({ dataDir = defaultDataDir(), localDataD
             return persist(papers,collections);
           }));
         }
-        if (url.pathname === '/api/library' && req.method === 'GET') return send(res, 200, library);
-        if (url.pathname === '/api/library' && req.method === 'PUT') { const body = await jsonBody(req); return send(res, 200, await exclusive(async () => { if (body.revision !== library.revision) throw fail(409, 'Library changed. Reload before saving.'); if (!Array.isArray(body.papers) || new Set(body.papers.map(p => p?.id)).size !== body.papers.length) throw fail(400, 'Invalid or duplicate references.'); for (const p of body.papers) await validatePaper(p); return persist(body.papers); })); }
+        if (url.pathname === '/api/library' && req.method === 'GET') return send(res, 200, await exclusive(async()=>{await syncExternalNotes({readOnly:true});return library;}));
+        if (url.pathname === '/api/library' && req.method === 'PUT') { const body = await jsonBody(req); return send(res, 200, await exclusive(async () => { await syncExternalNotes();if (body.revision !== library.revision) throw fail(409, 'Library changed. Reload before saving.'); if (!Array.isArray(body.papers) || new Set(body.papers.map(p => p?.id)).size !== body.papers.length) throw fail(400, 'Invalid or duplicate references.'); for (const p of body.papers) await validatePaper(p); return persist(body.papers); })); }
         if (url.pathname === '/api/pdfs' && req.method === 'POST') {
           if (req.headers['content-type']?.split(';')[0] !== 'application/pdf') throw fail(415, 'Upload application/pdf.');
           let pdfName; try { pdfName = path.basename(decodeURIComponent(req.headers['x-folio-filename'] || 'paper.pdf')).replace(/[\r\n\x00]/g, '').slice(0, 255); } catch { throw fail(400, 'Invalid filename.'); }
@@ -233,6 +242,7 @@ export async function createFolioServer({ dataDir = defaultDataDir(), localDataD
           res.writeHead(status, { 'Content-Type': 'application/pdf', 'Content-Length': end - start + 1, 'Accept-Ranges': 'bytes', 'Content-Disposition': url.searchParams.get('download')==='1'?`attachment; filename="paper.pdf"; filename*=UTF-8''${encodeURIComponent(library.papers.find(p=>p.pdfId===match[1])?.pdfName||'paper.pdf')}`:'inline', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store' }); if (req.method === 'HEAD') res.end(); else createReadStream(file, { start, end }).on('error', () => res.destroy()).pipe(res); return;
         }
         if (url.pathname === '/api/capture' && req.method === 'POST') { const body = await jsonBody(req);const captureWarnings=[];if(body.lookup!==false&&(body.pmid||body.doi)){try{const found=await pubmedLookup({pmid:body.pmid,doi:body.doi});if(body.doi&&found.doi&&normalizeDoi(body.doi)!==normalizeDoi(found.doi))throw fail(400,'PMID and DOI refer to different records.');for(const key of ['title','authors','journal','year','doi','sourceUrl'])if(!body[key])body[key]=found[key];for(const key of ['pmid','arxivId','cslType','publisher','publisherPlace','eventTitle','volume','issue','pages','journalAbbreviation','cslAuthors','dateParts'])if(found[key]!==undefined)body[key]=found[key];}catch(e){if(e.status)throw e;captureWarnings.push(e.message);}} return send(res, 200, await exclusive(async () => {
+          await syncExternalNotes();
           const doi = normalizeDoi(body.doi), sourceUrl = webUrl(body.url || body.sourceUrl), pdfUrl = webUrl(body.pdfUrl);
           const existing = library.papers.find(p => body.pmid&&p.pmid===body.pmid || doi && normalizeDoi(p.doi) === doi || sourceUrl && p.sourceUrl === sourceUrl);
           if(existing){const updated={...existing};for(const key of ['pmid','arxivId','cslType','publisher','publisherPlace','eventTitle','volume','issue','pages','journalAbbreviation','cslAuthors','dateParts'])if(!updated[key]&&body[key])updated[key]=body[key];if(body.pdfId&&!existing.pdfId){updated.pdfId=body.pdfId;updated.pdfName=body.pdfName||'paper.pdf';}if(JSON.stringify(updated)!==JSON.stringify(existing)){await validatePaper(updated);await persist(library.papers.map(p=>p.id===updated.id?updated:p));}return {paper:updated,duplicate:true,warnings:captureWarnings};}

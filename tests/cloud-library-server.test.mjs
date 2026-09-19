@@ -35,7 +35,7 @@ test('cloud library keeps PDFs/styles portable and credentials, reading cache, a
  assert.equal((await f.call(chat,'POST',{question:'',summary:true})).status,200);
  const style='<style xmlns="http://purl.org/net/xbiblio/csl" version="1.0" class="in-text"><info><title>Cloud fixture</title><id>http://www.zotero.org/styles/cloud-fixture</id></info><citation><layout><text variable="citation-number"/></layout></citation><bibliography><layout><text variable="title"/></layout></bibliography></style>';
  assert.equal((await f.call('/api/citations/style-import','POST',{xml:style})).status,200);
- assert.deepEqual((await readdir(f.dataDir)).sort(),['citation-styles','library.json','pdfs']);
+ assert.deepEqual((await readdir(f.dataDir)).sort(),['citation-styles','library.json','notes','pdfs']);
  const localNames=await readdir(f.localDataDir);for(const name of ['connector-token','paper-chat','reading-cache'])assert.ok(localNames.includes(name));
  assert.ok((await readdir(path.join(f.localDataDir,'reading-cache'))).length>0);
  assert.ok((await readdir(path.join(f.dataDir,'citation-styles'))).length>0);

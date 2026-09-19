@@ -20,6 +20,16 @@ test('move verifies data, selects target, then deletes only copied old files and
  assert.deepEqual(await readFile(path.join(s.targetDir,'library.json')),original);assert.equal(await readFile(path.join(s.targetDir,'pdfs',other+'.pdf'),'utf8'),'%PDF unattached retained');assert.deepEqual((await readdir(s.targetDir)).sort(),['citation-styles','library.json','pdfs']);
  assert.deepEqual(await finalizeLibraryMove({configDir:s.configDir,migrationId:move.id}),{completed:true,warnings:[]});assert.deepEqual(await readdir(path.join(s.sourceDir,'pdfs')),[]);assert.equal(await readFile(path.join(s.sourceDir,'connector-token'),'utf8'),'private token');assert.equal(await readFile(path.join(s.sourceDir,'paper-chat','settings.json'),'utf8'),'private credentials');assert.equal(await readFile(path.join(s.sourceDir,'reading-cache','cache'),'utf8'),'cache bytes');assert.equal((await s.resolve()).migration,undefined);
 });
+test('Markdown notes move with the library folder',async t=>{
+ const s=await setup(t),name='Paper--1234567890abcdef12345678.md';
+ await mkdir(path.join(s.sourceDir,'notes'));await writeFile(path.join(s.sourceDir,'notes',name),'# An external note\n');
+ await mkdir(path.join(s.sourceDir,'notes','.obsidian'));await writeFile(path.join(s.sourceDir,'notes','.obsidian','app.json'),'{}');
+ const move=await prepareLibraryMove(s);assert.equal(move.fileCount,5);
+ await activateLibraryMove({configDir:s.configDir,migrationId:move.id});
+ assert.equal(await readFile(path.join(s.targetDir,'notes',name),'utf8'),'# An external note\n');
+ assert.equal((await finalizeLibraryMove({configDir:s.configDir,migrationId:move.id})).completed,true);
+ assert.deepEqual(await readdir(path.join(s.sourceDir,'notes')),['.obsidian']);
+});
 test('nonempty, contained and symlink targets fail without changing active library',async t=>{
  const s=await setup(t);await writeFile(path.join(s.targetDir,'personal.txt'),'keep');await assert.rejects(prepareLibraryMove(s),/empty/);assert.equal(await readFile(path.join(s.targetDir,'personal.txt'),'utf8'),'keep');
  const child=path.join(s.sourceDir,'nested');await mkdir(child);await assert.rejects(prepareLibraryMove({...s,targetDir:child}),/separate/);await assert.rejects(prepareLibraryMove({...s,targetDir:s.root}),/separate/);

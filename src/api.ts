@@ -1,6 +1,6 @@
 import type { Paper } from './model';
 let token='';
-export async function connect():Promise<{token:string;dataDir:string;extensionDir:string}>{const response=await fetch('/api/session');if(!response.ok)throw Error('Refhaven library service is unavailable. Start Refhaven and try again.');const session=await response.json();token=session.token;return session;}
+export async function connect():Promise<{token:string;dataDir:string;notesDir:string;extensionDir:string}>{const response=await fetch('/api/session');if(!response.ok)throw Error('Refhaven library service is unavailable. Start Refhaven and try again.');const session=await response.json();token=session.token;return session;}
 export async function api<T>(path:string,init:RequestInit={}):Promise<T>{const response=await fetch(path,{...init,headers:{Authorization:`Bearer ${token}`,...init.headers}});if(!response.ok){let message=`Request failed (${response.status})`;try{const data=await response.json();message=data.error||message;}catch{}throw Object.assign(new Error(message),{status:response.status});}if(response.status===204)return undefined as T;return response.json();}
 export const loadLibrary=()=>api<{papers:Paper[];collections:string[];revision:number}>('/api/library');
 export const writeLibrary=(papers:Paper[],revision:number)=>api<{papers:Paper[];collections:string[];revision:number}>('/api/library',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({papers,revision})});

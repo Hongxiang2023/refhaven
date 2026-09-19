@@ -57,6 +57,14 @@ Choose **Import references** and select `.ris` or a Refhaven reference-export `.
 - Use **Edit** to manage tags and metadata. The star button marks a paper as a favorite.
 - Reading notes save automatically after a short pause or when the field loses focus. Check **Saved** before closing; a failed save shows a retry message.
 
+### Use reading notes in Obsidian or another editor
+
+Refhaven saves each paper's freeform **Reading notes** as a plain Markdown file in `notes/` inside your current library folder. Open **Library & connector → Markdown notes → Copy notes folder path** to find it. In Obsidian, choose **Open folder as vault** and select that `notes` folder. A local AI tool can read the same files if you give it access to that folder. No Obsidian plugin or account connection is required.
+
+The filename starts with the paper's title and ends with a stable paper key. It keeps its original name if you later rename the paper in Refhaven; do not remove the key suffix. You may edit the Markdown in Obsidian or another text editor. Refhaven checks the files while open and shows external changes in the reading note field. Changes made in Refhaven update the file. If both editors change the same note, Refhaven rejects the stale in-app save and asks you to copy your draft before reloading; it never silently merges conflicting text. Keep a backup before bulk edits. Removing or renaming a note file is not a deletion command: Refhaven may recreate it from its library copy.
+
+This sync covers the freeform Reading notes field. Highlights and notes attached to selected passages remain in `library.json`; they are still included in a full library backup. The Markdown files in `notes/` move with a selected library folder and are included in full compressed backups. Obsidian's optional `.obsidian` settings folder is left where it was; reopen the moved `notes/` folder as a vault if you move your library. If the library is in a cloud-provider folder, keep Refhaven open on only one computer at a time and wait for provider sync before switching computers.
+
 Opening a To read paper's PDF changes its status to Reading. Set Finished yourself after reading. **Copy BibTeX citation** copies the selected paper's export text. **Delete reference** asks for confirmation and removes the reference and its attachment association; a shared PDF remains if another reference needs it. Make a backup before removing valuable work.
 
 ## Read PDFs and create reading views
@@ -196,7 +204,7 @@ Advanced users can set `FOLIO_DATA_DIR` before startup. Do not run two services 
 
 **Export references** downloads Refhaven JSON with reference metadata, including notes/highlights where present, but without PDF attachments. Use this for reference transfer, not as your only PDF backup.
 
-**Download full compressed backup**, in **Library & connector**, creates a `.tar.gz` with references, referenced PDFs, and supported local library data such as conversations. It excludes regenerable reading caches and private pairing/API/account credentials. PDFs are losslessly archived rather than downsampled. Keep Refhaven open until the download finishes. A full backup reads every referenced PDF, so online-only PDFs download again and temporarily use local disk space.
+**Download full compressed backup**, in **Library & connector**, creates a `.tar.gz` with references, Markdown notes, referenced PDFs, and supported local library data such as conversations. It excludes regenerable reading caches and private pairing/API/account credentials. PDFs are losslessly archived rather than downsampled. Keep Refhaven open until the download finishes. A full backup reads every referenced PDF, so online-only PDFs download again and temporarily use local disk space.
 
 To restore a downloaded backup:
 
@@ -221,7 +229,7 @@ This optional desktop feature changes where Refhaven stores its reference data a
 4. Keep Refhaven open while it copies and verifies the files. Refhaven restarts using the new location, verifies the move, and cleans up the migrated source copies after successful activation. Do not manually delete the source to finish a move.
 5. Reopen settings and use **Open folder** to inspect the selected location. Check a PDF, notes, and reference details, then wait for the provider’s upload to finish.
 
-The moved files are `library.json`, `pdfs/`, and installed `citation-styles/`. Reference-level reading notes, colors, highlights, and passage notes are part of `library.json`, so they move with it. Connector tokens, API/account credentials, paper conversations, and reading caches stay in the original **local application-data folder**. They are not moved into the provider folder by this feature.
+The moved files are `library.json`, `pdfs/`, `notes/`, and installed `citation-styles/`. Freeform reading notes are mirrored in `library.json` and individual Markdown files. Colors, highlights, and passage notes remain in `library.json`. Connector tokens, API/account credentials, paper conversations, and reading caches stay in the original **local application-data folder**. They are not moved into the provider folder by this feature.
 
 ### Free space after the upload
 

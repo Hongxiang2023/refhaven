@@ -25,6 +25,7 @@
 
 - **Collect & organize.** Import PDFs and references, look up PMID/DOI/arXiv metadata, or capture a paper from Chrome or Edge. Use collections, tags, stars, and reading status.
 - **Read & annotate.** Keep article text and figures together. Use five highlight colors and passage notes, with the original PDF a click away. Reading caches are removable.
+- **Use your notes elsewhere.** Freeform reading notes are Markdown files in the library's `notes/` folder. Open the folder in Obsidian or another editor; Refhaven imports external edits and warns on conflicting saves.
 - **Cite & revise.** Generate references from identifiers, export Word, then upload your edited document to refresh citations and the bibliography. Preserve Refhaven’s citation controls between revisions.
 - **Choose your storage.** Keep your library local or move it to a folder managed by OneDrive, Google Drive, or Box. After upload, use your provider’s online-only controls for PDFs.
 

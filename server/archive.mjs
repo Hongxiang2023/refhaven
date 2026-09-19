@@ -1,5 +1,5 @@
 import {createReadStream} from 'node:fs';
-import {stat,readFile,readdir} from 'node:fs/promises';
+import {stat,lstat,readFile,readdir} from 'node:fs/promises';
 import {Readable} from 'node:stream';
 import {pipeline} from 'node:stream/promises';
 import {createGzip} from 'node:zlib';
@@ -15,6 +15,8 @@ export async function streamBackup(res,library,dataDir,localDataDir=dataDir){
   const metadata=Buffer.from(JSON.stringify(library,null,2));yield tarHeader('library.json',metadata.length);yield metadata;if(metadata.length%512)yield Buffer.alloc(512-metadata.length%512);
   const ids=new Set(library.papers.map(p=>p.pdfId).filter(Boolean));
   for(const id of ids){const filename=path.join(dataDir,'pdfs',`${id}.pdf`);const {size}=await stat(filename);yield tarHeader(`pdfs/${id}.pdf`,size);for await(const chunk of createReadStream(filename))yield chunk;if(size%512)yield Buffer.alloc(512-size%512);}
+  let notes=[];try{notes=(await readdir(path.join(dataDir,'notes'))).filter(name=>name.endsWith('.md'));}catch(e){if(e.code!=='ENOENT')throw e;}
+  for(const name of notes){const filename=path.join(dataDir,'notes',name),info=await lstat(filename);if(!info.isFile())throw Error('The notes folder contains an unsupported Markdown entry.');const value=await readFile(filename);yield tarHeader(`notes/${name}`,value.length);yield value;if(value.length%512)yield Buffer.alloc(512-value.length%512);}
   // Conversations are user work; connection settings and credentials never enter backups.
   for(const id of ids){let chat;try{chat=await readFile(path.join(localDataDir,'paper-chat',id+'.json'));}catch(e){if(e.code==='ENOENT')continue;throw e;}yield tarHeader(`paper-chat/${id}.json`,chat.length);yield chat;if(chat.length%512)yield Buffer.alloc(512-chat.length%512);}
   let styleFiles=[];try{styleFiles=(await readdir(path.join(dataDir,'citation-styles'))).filter(n=>/^[a-f0-9]{64}\.json$/.test(n));}catch(e){if(e.code!=='ENOENT')throw e;}

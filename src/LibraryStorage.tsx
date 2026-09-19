@@ -49,7 +49,7 @@ export default function LibraryStorage({onBusyChange}:Props){
    <div className="folio-location-actions"><button type="button" className="folio-primary" disabled={busy||loading} onClick={()=>void chooseFolder()}>{phase==='choosing'?'Changing folder…':phase==='restarting'?'Restarting Refhaven…':'Choose library folder'}</button><button type="button" className="folio-location-open" disabled={busy||loading} onClick={()=>void revealFolder()}>{phase==='revealing'?'Opening…':'Open folder'}</button></div>
    <p className="folio-location-hint">Choose an empty, dedicated folder in the system dialog and review the confirmation. Refhaven restarts after a successful move. Keep it open until the move finishes.</p>
   </>:!loading&&location&&<p className="folio-location-unavailable">Changing the library folder is available in the Refhaven desktop app. This browser session uses the folder configured by its local Refhaven service.</p>}
-  <p className="folio-location-hint">References, PDFs, highlights, notes, and citation styles move together. Credentials, AI conversations, and reading caches stay on this computer. Remove unneeded reading caches in the reading view to reclaim their space.</p>
+  <p className="folio-location-hint">References, PDFs, Markdown notes, highlights, and citation styles move together. Credentials, AI conversations, and reading caches stay on this computer. Remove unneeded reading caches in the reading view to reclaim their space.</p>
   <details className="folio-cloud-folder-help"><summary>Use a cloud folder and reduce local disk use</summary>
    <ol>
     <li>Install and sign in to your cloud provider’s desktop app, then create and choose an empty Refhaven folder inside its managed location.</li>
