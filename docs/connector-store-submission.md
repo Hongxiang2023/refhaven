@@ -14,12 +14,16 @@ Refhaven Connector is a Manifest V3 extension for Chrome and Edge. Build the upl
 
 **Privacy policy:** https://github.com/Hongxiang2023/refhaven/blob/main/docs/connector-privacy.md
 
+**Listing screenshot:** `docs/assets/connector-store-screenshot.png` (1280 × 800). This uses the connector's current popup layout and clearly fictional paper metadata.
+
 ## Permission explanation
 
 - `activeTab` and `scripting`: read citation metadata from the current article only when the user opens the popup.
 - `storage`: keep the local Refhaven pairing key in the browser profile.
 - `http://127.0.0.1:47821/*`: send the saved reference and optional PDF to the local desktop app.
 - Optional `http://*/*` and `https://*/*`: request the specific publisher host only when the user chooses to attach a cross-site PDF; newly granted access is removed after the attempt.
+
+**Privacy form:** Disclose active-page website content and URLs, saved citation/PDF content, and the locally stored pairing key even though Refhaven does not collect them on a remote service. The extension does not execute remote code. Check the final dashboard choices against the live code before submitting.
 
 ## Release gate
 
