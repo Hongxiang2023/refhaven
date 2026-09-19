@@ -12,7 +12,7 @@ This free Chromium Manifest V3 extension saves the current page to a Refhaven ap
 6. At the bottom of the connector popup, expand **Pair with Refhaven**, paste the key into **Connector token**, and click **Save token**. This is where the connector settings are located.
 7. Open an article page, open the connector, and click **Save reference to Refhaven**, then **Attach available PDF**. Keep the popup open until saving finishes.
 
-After updating Refhaven, click **Reload** (circular arrow) on the Refhaven Connector card in your browser’s extension manager, then refresh the article page.
+The path displayed by Refhaven is a persistent copy in local app data, separate from the replaceable app bundle. If your old unpacked extension was loaded from an app bundle or extracted ZIP and disappeared, load the displayed folder once. After updating Refhaven, click **Reload** (circular arrow) on the Refhaven Connector card in your browser’s extension manager, then refresh the article page.
 
 For university access, sign in through your library and open the proxied article first. Same-site PDFs download from that tab using its browser session; recognized proxy URLs retain their institutional hostname. **Open PDF in browser (check access)** lets you confirm the PDF is accessible. If a login page appears, finish signing in, return to the article, refresh, and retry.
 

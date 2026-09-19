@@ -9,6 +9,7 @@ import {extractDocx,generateDocx,createDocx} from './word.mjs';
 import {streamBackup} from './archive.mjs';
 import { createReadStream } from 'node:fs';
 import { mkdir, open, readFile, readdir, rename, rm, stat, statfs } from 'node:fs/promises';
+import {installConnector} from './connector-install.mjs';
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { homedir } from 'node:os';
 import path from 'node:path';
@@ -63,6 +64,7 @@ function validateCitationFields(p){if(!validHighlights(p.highlights))throw fail(
 export async function createFolioServer({ dataDir = defaultDataDir(), localDataDir = dataDir, libraryLocation, storageReady=()=>true, staticDir = fileURLToPath(new URL('../dist', import.meta.url)), pubmedLookup=lookupPubmed, identifierLookup=lookupCitationIdentifier, secretStorage, cropImage, aiGenerate, codexFactory, styleFetch, extensionDir=fileURLToPath(new URL('../extension',import.meta.url)) } = {}) {
   await mkdir(path.join(dataDir, 'pdfs'), { recursive: true, mode: 0o700 });
   await mkdir(localDataDir,{recursive:true,mode:0o700});
+  const installedExtensionDir=await installConnector(extensionDir,localDataDir);
   const externalLibrary=path.resolve(dataDir)!==path.resolve(localDataDir);
   const readingCache=readingCacheStore(localDataDir);
   const citationStyles=await createCitationStyles({dataDir,...(styleFetch?{fetchImpl:styleFetch}:{})});
@@ -118,7 +120,7 @@ export async function createFolioServer({ dataDir = defaultDataDir(), localDataD
         if (url.pathname === '/api/session' && req.method === 'GET') {
           if (extension || (req.headers['sec-fetch-site'] && !['same-origin', 'none'].includes(req.headers['sec-fetch-site']))) throw fail(403, 'Open Refhaven directly to pair the connector.');
           res.setHeader('Set-Cookie', `folio_session=${token}; HttpOnly; SameSite=Strict; Path=/`);
-          return send(res, 200, { token, dataDir, extensionDir:path.resolve(extensionDir) });
+          return send(res, 200, { token, dataDir, extensionDir:installedExtensionDir });
         }
         if(relocating)throw fail(503,'Refhaven is moving the library. Wait for it to reopen.');
         const cookie = req.headers.cookie?.split(';').map(x => x.trim()).find(x => x.startsWith('folio_session='))?.slice(14);

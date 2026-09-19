@@ -171,14 +171,14 @@ Word conversion covers main-body paragraphs and tables, including markers split 
 The connector is provided as an unpacked Chrome/Edge extension, not a store installation. Firefox and Safari packages are not provided.
 
 1. Keep Refhaven running. Open **Library & connector → Connector folder**, then **Copy folder path**.
-2. Visit `chrome://extensions` or `edge://extensions`, enable **Developer mode**, and choose **Load unpacked**. Select the entire connector folder containing `manifest.json`. Source builds use the repository's `extension` directory; desktop packages include their own copy.
+2. Visit `chrome://extensions` or `edge://extensions`, enable **Developer mode**, and choose **Load unpacked**. Select the entire connector folder containing `manifest.json`. Refhaven copies the connector to a stable local app-data folder shown in the app. Load that folder, which survives replacement or relocation of the app bundle.
 3. On macOS, press Command–Shift–G in the picker to paste the folder path. On Windows, use Alt+D for the address bar.
 4. In Refhaven, choose **Copy connector pairing key**. Open **Refhaven Connector** from the browser Extensions menu, expand **Pair with Refhaven**, paste into **Connector token**, and choose **Save token**.
 5. Open an article page. Use **Save reference to Refhaven**, then **Attach available PDF** if offered. Keep the popup open while saving/downloading.
 
 The connector reads supported scholarly citation metadata from the invoked page. PDF host access may require a browser permission. For university access, sign in through your library first. If capture fails, use **Open PDF in browser (check access)** or download the PDF yourself and attach it in Refhaven. Refhaven does not bypass publisher access restrictions.
 
-After a connector update, choose **Reload** on the extension's browser-manager card, then refresh the article page. Keep your pairing key private. To revoke it, stop Refhaven, remove only `connector-token` from the library folder, restart, and pair trusted connectors again.
+After a Refhaven update, choose **Reload** on the extension's browser-manager card, then refresh the article page. An unpacked connector remains installed only while the browser profile and this local folder remain intact; store publication is needed for store-managed automatic updates. Keep your pairing key private. To revoke it, stop Refhaven, remove only `connector-token` from the library folder, restart, and pair trusted connectors again.
 
 ## Back up, restore, and move your library
 
