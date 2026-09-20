@@ -83,11 +83,11 @@
         ]
       },
       {
-        "from": "node_modules/electron/dist/LICENSE",
+        "from": "node_modules/electron/LICENSE",
         "to": "licenses/Electron-LICENSE.txt"
       },
       {
-        "from": "node_modules/electron/dist/LICENSES.chromium.html",
+        "from": "assets/licenses/LICENSES.chromium.html",
         "to": "licenses/LICENSES.chromium.html"
       }
     ]
