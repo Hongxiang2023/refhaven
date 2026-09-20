@@ -1,6 +1,6 @@
 {
   "name": "refhaven-reference-manager",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A free, local-first reference manager for reading papers and writing manuscripts",
   "private": true,
   "type": "module",
