@@ -31,7 +31,7 @@
 
 No Refhaven account, subscription, or analytics. Your library is local by default; cloud-folder storage is optional. Identifier lookup and optional AI use external services for their respective tasks. AI uses your own connection and requires per-paper enablement. [Privacy & security](SECURITY.md)
 
-**Browser connector:** Version 0.1.4 is pending Chrome Web Store review as of September 19, 2026, so Store installation is not available yet. You can [set up the unpacked Chrome/Edge connector](docs/user-guide.md#save-papers-with-the-browser-connector) now. Its folder survives app replacement; Chrome Store installation will provide browser-managed updates after approval. Edge Add-ons has not been submitted.
+**Browser connector:** [Refhaven Connector 0.1.4 is available in the Chrome Web Store](https://chromewebstore.google.com/detail/refhaven-connector/ijpjnopkleehgbhflkkeiajhamehpghk). Install it, then pair it once from **Library & connector** in the desktop app. [Connector setup](docs/user-guide.md#save-papers-with-the-browser-connector) also covers replacing an unpacked copy. Edge Add-ons has not been submitted.
 
 ## Download & install
 

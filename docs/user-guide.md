@@ -56,6 +56,7 @@ Choose **Import references** and select `.ris` or a Refhaven reference-export `.
 - Create a collection with **＋ New**, then assign a selected paper using its Collection dropdown. Each paper belongs to one collection. Manage a collection to rename or remove it; removing one moves its papers to Unfiled and keeps their PDFs and notes.
 - Use **Edit** to manage tags and metadata. The star button marks a paper as a favorite.
 - Reading notes save automatically after a short pause or when the field loses focus. Check **Saved** before closing; a failed save shows a retry message.
+- In **Reading notes**, switch between **Edit** and **Preview** to read your Markdown with headings, lists, links, code blocks, and tables rendered. Preview displays the current draft; saving still follows the status below it.
 
 ### Use reading notes in Obsidian or another editor
 
@@ -176,19 +177,17 @@ Word conversion covers main-body paragraphs and tables, including markers split 
 
 ## Save papers with the browser connector
 
-**Store status:** Refhaven Connector 0.1.4 was submitted to the Chrome Web Store on September 19, 2026 and is pending review. It is not yet available to install from the Store. The current unpacked setup below works while review is in progress. An Edge Add-ons listing has not been submitted. Firefox and Safari packages are not provided.
+**Store status:** [Refhaven Connector 0.1.4 is available in the Chrome Web Store](https://chromewebstore.google.com/detail/refhaven-connector/ijpjnopkleehgbhflkkeiajhamehpghk). An Edge Add-ons listing has not been submitted. Firefox and Safari packages are not provided.
 
-1. Keep Refhaven running. Open **Library & connector → Connector folder**, then **Copy folder path**.
-2. Visit `chrome://extensions` or `edge://extensions`, enable **Developer mode**, and choose **Load unpacked**. Select the entire connector folder containing `manifest.json`. Refhaven copies the connector to a stable local app-data folder shown in the app. Load that folder, which survives replacement or relocation of the app bundle.
-3. On macOS, press Command–Shift–G in the picker to paste the folder path. On Windows, use Alt+D for the address bar.
-4. In Refhaven, choose **Copy connector pairing key**. Open **Refhaven Connector** from the browser Extensions menu, expand **Pair with Refhaven**, paste into **Connector token**, and choose **Save token**.
-5. Open an article page. Use **Save reference to Refhaven**, then **Attach available PDF** if offered. Keep the popup open while saving/downloading.
+1. Keep Refhaven running and [install Refhaven Connector from the Chrome Web Store](https://chromewebstore.google.com/detail/refhaven-connector/ijpjnopkleehgbhflkkeiajhamehpghk).
+2. In Refhaven, open **Library & connector → Copy connector pairing key**. Open **Refhaven Connector** from Chrome's Extensions menu, expand **Pair with Refhaven**, paste into **Connector token**, and choose **Save token**. Pin the connector for faster access.
+3. Open an article page. Use **Save reference to Refhaven**, then **Attach available PDF** if offered. Keep the popup open while saving/downloading.
 
 The connector reads supported scholarly citation metadata from the invoked page. PDF host access may require a browser permission. For university access, sign in through your library first. If capture fails, use **Open PDF in browser (check access)** or download the PDF yourself and attach it in Refhaven. Refhaven does not bypass publisher access restrictions.
 
-**After Store approval:** Install Refhaven Connector from its Chrome Web Store listing, then pair that Store copy using the key from Refhaven. The Store copy has a different browser ID, so pairing the unpacked copy does not carry over. Once the Store copy works, remove the old unpacked entry from `chrome://extensions` to avoid two connectors. Chrome manages updates for the Store copy; updating the desktop app is separate. We will add the Store installation link here after the listing is live.
+**Replacing an unpacked copy:** Pair the Store copy separately; its browser ID differs from the unpacked copy. Confirm a reference saves, then remove the unpacked entry from `chrome://extensions` to avoid two connectors. Chrome updates the Store copy; updating the desktop app is separate.
 
-For an unpacked installation, choose **Reload** on the extension's browser-manager card after a Refhaven update, then refresh the article page. It stays installed while the browser profile and stable local folder remain intact. A browser profile reset, manual removal, or deleted app data requires installation again. Keep your pairing key private. To revoke it, stop Refhaven, remove only `connector-token` from the library folder, restart, and pair trusted connectors again.
+**Manual setup for Edge or an unpacked connector:** Open **Library & connector → Copy folder path**. Visit `chrome://extensions` or `edge://extensions`, enable **Developer mode**, and choose **Load unpacked**. Select the entire connector folder containing `manifest.json`. On macOS, press Command–Shift–G in the picker to paste the path; on Windows, use Alt+D. Pair it as above. After a Refhaven update, choose **Reload** on its browser-manager card, then refresh the article page. Keep your pairing key private. To revoke it, stop Refhaven, remove only `connector-token` from the library folder, restart, and pair trusted connectors again.
 
 ## Back up, restore, and move your library
 
