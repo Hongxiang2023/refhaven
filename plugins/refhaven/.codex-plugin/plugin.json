@@ -1,0 +1,23 @@
+{
+  "name": "refhaven",
+  "version": "0.1.0",
+  "description": "Find references in your local Refhaven library, resolve scholarly identifiers, and format or export bibliographies.",
+  "author": {
+    "name": "Refhaven"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Refhaven",
+    "shortDescription": "References and bibliographies from your local Refhaven app.",
+    "longDescription": "Connect a running Refhaven desktop app to search citation metadata, look up scholarly identifiers, format bibliographies, and export Word, BibTeX, or RIS files. Requires Node.js 22.13 or newer. Selected citation metadata is returned to your connected assistant; public identifier lookups contact metadata providers. PDF contents, private notes, and highlights are not exposed by these tools.",
+    "developerName": "Refhaven",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Find DNA methylation papers in my Refhaven library.",
+      "Format these DOIs as a Nature bibliography.",
+      "Export my selected references to a Word bibliography."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}

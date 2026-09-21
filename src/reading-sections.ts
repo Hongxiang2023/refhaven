@@ -51,6 +51,22 @@ export function canonicalSection(text:string):string|undefined{
 // vocabulary. Small body footnotes and references remain available.
 export function filterReadingItems(items:Items,width:number,styles:Styles,context:ReadingContext={},pageHeight?:number,pageNumber?:number):Items{
  const nature=readingProfile(context)==='nature';
+ // Reviews use a wide abstract beside a navigation sidebar. Establish both
+ // labels and the Harding prose before excluding the first-page front matter.
+ if(nature&&pageNumber===1){
+  const abstract=items.find(i=>i.str.trim()==='Abstract'&&i.transform[4]<width*.2);
+  const contents=items.find(i=>i.str.trim()==='Sections'&&i.transform[4]>width*.65);
+  if(abstract&&contents&&Math.abs(abstract.transform[5]-contents.transform[5])<abstract.height){
+   const prose=items.filter(i=>/HardingText/.test(styles?.[i.fontName||'']?.fontName||'')&&i.transform[4]<contents.transform[4]-10&&i.transform[5]<abstract.transform[5]&&i.str.trim().length>35);
+   if(prose.length>=5){
+    const bottom=Math.min(...prose.map(i=>i.transform[5]))-prose[0].height*.6;
+    items=items.filter(i=>i.transform[4]<contents.transform[4]-10&&i.transform[5]<=abstract.transform[5]+1&&i.transform[5]>=bottom);
+   }
+  }
+ }
+ // Some Graphik text layers encode the l in “article” as U+001F.
+ // Match only the complete publisher heading in the upper margin.
+ if(nature&&pageHeight)items=items.filter(i=>!(i.transform[5]>pageHeight*.9&&/^Review artic(?:l|\x1f)e$/i.test(i.str.trim())&&/Graphik/.test(styles?.[i.fontName||'']?.fontName||'')));
  const communications=/^(?:Nature Communications|Nat\.? Commun\.?)$/i.test(context.journal||'')||/^10\.1038\/(?:s41467-|ncomms)/i.test(context.doi||'');
  if(communications){
   // Legacy production marks are rotated in the outer margin, not prose.

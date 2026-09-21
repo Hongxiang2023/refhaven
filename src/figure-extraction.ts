@@ -107,16 +107,28 @@ export function extractFigureContent(items:Item[],width:number,height:number,sty
   const isPlaceholder=placeholder.test(caption);
   // Figures precede their caption in these layouts. Use the full printable
   // width to retain panel edges and graphical objects without text labels.
-  const labels=items.filter(i=>i.str.trim()&&i.transform[5]>y+size*2&&i.transform[5]<height-35&&/^[A-Z]{6}\+/.test(styles[i.fontName||'']?.fontName||'')&&!/HardingText/.test(styles[i.fontName||'']?.fontName||''));
-  const narrow=labels.length>2&&Math.max(...labels.map(i=>i.transform[4]+i.width))<width/2+5;
-  const left=30,right=narrow?width/2:width-30;
+  const artwork=items.filter(i=>i.str.trim()&&!selected.includes(i)&&Math.abs(i.height)>0&&Math.abs(i.height)<=size*1.6&&i.transform[5]>30&&i.transform[5]<height-65&&/Graphik|^[A-Z]{6}\+/.test(styles[i.fontName||'']?.fontName||'')&&!/HardingText/.test(styles[i.fontName||'']?.fontName||''));
+  // A side legend starts alongside the panels and runs down their right edge.
+  // Require both aligned artwork and several labels below the caption start;
+  // a normal right-column caption beneath its image must not trigger this.
+  const sideLabels=artwork.filter(i=>i.transform[4]+i.width<seed.transform[4]-3&&i.transform[5]<=y+size*2);
+  const side=verified&&seed.transform[4]>width*.55&&sideLabels.filter(i=>i.transform[5]<y-size*3).length>=3&&sideLabels.some(i=>Math.abs(i.transform[5]-y)<size*2);
+  const labels=side?sideLabels:artwork.filter(i=>i.transform[5]>y+size*2);
+  const narrow=!side&&labels.length>2&&Math.max(...labels.map(i=>i.transform[4]+i.width))<width/2+5;
+  const left=30,right=side?seed.transform[4]-5:narrow?width/2:width-30;
   const bodyAbove=items.filter(i=>i.transform[4]<right-10&&i.transform[4]+i.width>left&&i.str.trim().length>45&&i.height>size*1.1&&i.transform[5]>y+size*3&&/HardingText/i.test(styles[i.fontName||'']?.fontName||''));
-  const top=bodyAbove.length?height-Math.min(...bodyAbove.map(i=>i.transform[5]))+8:45;
-  const bottomTop=height-y-size-5;
+  let top=bodyAbove.length?height-Math.min(...bodyAbove.map(i=>i.transform[5]))+8:45;
+  // A panel letter locates the actual artwork top more reliably than the page
+  // margin, which can contain a running article header or prose.
+  const panels=labels.filter(i=>/^[A-Ea-k]$/.test(i.str.trim())&&/Graphik/i.test(styles[i.fontName||'']?.fontName||''));
+  if(panels.length)top=Math.max(top,height-Math.max(...panels.map(i=>i.transform[5]+Math.abs(i.height)))-7);
+  const bottomTop=side?height-Math.min(...labels.map(i=>i.transform[5]))+size:height-y-size-5;
   const crop=verified&&bottomTop-top>45?{x:Math.max(0,left/width),y:Math.max(0,top/height),width:Math.min(1,(right-left)/width),height:Math.min(1,(bottomTop-top)/height)}:undefined;
-  if(crop&&labels.length>2)for(const item of labels){
+  // Embedded font subset prefixes are optional. Geometry keeps figure text
+  // out of article prose without dropping Graphik headings or box text elsewhere.
+  if(crop&&labels.length>2)for(const item of items){
    const x=item.transform[4]/width,top=(height-item.transform[5])/height;
-   if(x>=crop.x&&x<=crop.x+crop.width&&top>=crop.y&&top<=crop.y+crop.height)removed.add(item);
+   if(x>=crop.x&&x+item.width/width<=crop.x+crop.width&&top>=crop.y&&top<=crop.y+crop.height)removed.add(item);
   }
   figures.push({page,label,caption:isPlaceholder?'':caption,captionPage:isPlaceholder?undefined:page,...(crop?{crop}: {})});
  }

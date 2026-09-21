@@ -1,0 +1,4 @@
+interface:
+  display_name: "Refhaven citations"
+  short_description: "Find references and format local bibliographies"
+  default_prompt: "Use $refhaven-citations to format my references and export a bibliography."

@@ -240,3 +240,24 @@ test('full STAR Methods stays reachable after an earlier Methods overview',()=>{
  assert.ok(result[2].headings.some(h=>h.title==='Methods'&&h.paragraph===0));
  assert.ok(result[2].headings.some(h=>h.title==='Cell type annotation'));
 });
+
+test('Nature Reviews keeps the wide abstract separate from its Sections sidebar',()=>{
+ const item=(str,x,y,height=12,fontName='prose')=>({str,transform:[height,0,0,height,x,y],width:380,height,fontName});
+ const styles={prose:{fontName:'HardingText-Regular'},label:{fontName:'GraphikNaturel-Semibold'}};
+ const lines=Array.from({length:6},(_,i)=>item(`Continuous abstract line ${i} describes the biological mechanisms in detail.`,40,500-i*16));
+ const items=[item('Paper title',40,630,34,'label'),item('Abstract',40,540,10,'label'),item('Sections',438,540,10,'label'),...lines,item('Introduction',438,508,8.5,'label'),item('Sidebar topic',438,479,8.5,'label'),item('Author affiliation',40,60,7,'label')];
+ const result=analyzeJournalPage(items,595,styles,1,{journal:'Nature Reviews Genetics'},791);
+ const text=result.paragraphs.join(' ');
+ assert.ok(text.startsWith('Abstract Continuous abstract line 0'));
+ for(let n=0;n<6;n++)assert.ok(text.includes(`abstract line ${n}`));
+ assert.doesNotMatch(text,/Sections|Sidebar|Introduction|affiliation|Paper title/);
+ // The evidence is specific to the opening-page template.
+ assert.ok(filterReadingItems(items,595,styles,{journal:'Nature Reviews Genetics'},791,2).some(i=>i.str==='Sidebar topic'));
+});
+
+test('Nature Reviews removes encoded running heading but preserves Graphik body terms',()=>{
+ const item=(str,y)=>({str,transform:[10,0,0,10,40,y],width:150,height:10,fontName:'graphik'});
+ const items=[item('Review artic\x1fe',740),item('Review article',300),item('transposable elements',280)];
+ const result=filterReadingItems(items,595,{graphik:{fontName:'GraphikNaturel-Medium'}},{journal:'Nature Reviews Genetics'},791,2);
+ assert.deepEqual(result.map(i=>i.str),['Review article','transposable elements']);
+});

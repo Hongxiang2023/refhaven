@@ -165,3 +165,27 @@ test('tiny PDF baseline jitter does not reorder fragments around inline mathemat
  const items=[item('sample',30,600,29),item('j',63,600,3),item('. The matrix entries',66,600,84),item('Kij',154,600,11),item('indicate the number of observations.',169,600.0003,125)];
  assert.deepEqual(pageParagraphs(items,600),['sample j. The matrix entries Kij indicate the number of observations.']);
 });
+
+test('explicit zero-height PDF spaces survive tightly justified word fragments',()=>{
+ const words=['Recent','advances','in','single-cell','multi-omic','sequencing,','in','con-'];
+ const runs=[];let x=306;
+ for(const word of words){const width=word.length*3.7;runs.push({...item(word,x,380,width),height:8.25});x+=width;runs.push({...item(' ',x,380,.098),height:0});x+=.794;}
+ runs.push({...item('junction with genetic and epigenetic perturbation, have begun to reveal',306,369,255),height:8.25});
+ x=306;
+ for(const word of ['the','spatiotemporal','specificity','and','genetic','redundancy','of','methyl-binding']){const width=word.length*3;runs.push({...item(word,x,358,width),height:8.25});x+=width;runs.push({...item(' ',x,358,.083),height:0});x+=.671;}
+ const text=pageParagraphs(runs,600).join(' ');
+ assert.equal(text,'Recent advances in single-cell multi-omic sequencing, in conjunction with genetic and epigenetic perturbation, have begun to reveal the spatiotemporal specificity and genetic redundancy of methyl-binding');
+});
+
+test('space evidence stays on its own baseline and does not split kerned words or citations',()=>{
+ const runs=[item('meth',30,700,20),item('ylation',50.5,700,30),{...item('12',80.5,703,5),height:6},item('.',85.5,700,2),{...item(' ',50,688,.1),height:0},item('Next',30,688,20),{...item(' ',50,688,.1),height:0},item('line',50.5,688,20)];
+ assert.equal(pageParagraphs(runs,600).join(' '),'methylation¹². Next line');
+});
+
+test('whitespace-only pages stay empty and gutter spaces do not merge columns',()=>{
+ assert.deepEqual(pageParagraphs([{...item(' ',30,700,300),height:0},item('',50,700,0)],600),[]);
+ const runs=[];
+ for(let n=0;n<5;n++)runs.push(item(`Left paragraph line ${n} stays in its own column.`,30,700-n*12,250),{...item(' ',280,700-n*12,50),height:0},item(`Right paragraph line ${n} stays in its own column.`,330,700-n*12,240));
+ const text=pageParagraphs(runs,600).join(' ');
+ assert.ok(text.indexOf('Left paragraph line 4')<text.indexOf('Right paragraph line 0'));
+});

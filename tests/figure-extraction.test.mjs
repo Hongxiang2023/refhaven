@@ -162,3 +162,18 @@ test('spanning captions retain inline italic sample sizes in baseline order',()=
  const r=extractFigureContent([item('Figure 5. Technical differences between two sequencing assays',53,176.54,7.4718,'title',370),item('(A) Comparison of cell fractions for single-cell (',53,167.07,6.9738,'body',212),item('n',265,167.07,6.9738,'italic',4),item('= 48) vs. single-nucleus (',271,167.07,6.9738,'body',76),item('n',347,167.07,6.9738,'italic',4),item('= 19) RNA-seq samples. Statistical significance',352,167.07,6.9738,'body',191),item('was assessed with a one-sided rank-sum test.',53,157.61,6.9738,'body',223),item('(B) UMAPs from single-cell (left,',53,148.2,6.9738,'body',177),item('n',231,148.2,6.9738,'italic',4),item('= 58,083 cells) and single-nucleus (right,',237,148.2,6.9738,'body',125),item('n',363,148.2,6.9738,'italic',4),item('= 63,703 nuclei) in matched samples',369,148.2,6.9738,'body',174),item('from one patient tumor.',53,138.73,6.9738,'body',122)],603,783,s,12);
  assert.match(r.figures[0].caption,/single-nucleus \(n = 19\) RNA-seq samples\. Statistical significance was assessed/);assert.match(r.figures[0].caption,/left, n = 58,083 cells\) and single-nucleus \(right, n = 63,703 nuclei\) in matched samples from one patient/);assert.equal(r.items.length,0);
 });
+test('Nature side legends recover every panel left of the caption without including article prose',()=>{
+ const s={...styles,label:{fontName:'GraphikNaturel-Regular'},panel:{fontName:'GraphikNaturel-Black'}};
+ const prose=item('The preceding article paragraph remains outside this figure.',40,510,8.25,'body',500);
+ const labels=[item('a',40,477,9.3,'panel',6),item('b',40,370,9.3,'panel',6),item('Chromatin complex',100,420,6.5,'label',120),item('DNA methylation',80,200,6.5,'label',120),item('Unmethylated C',190,55,6.5,'label',75)];
+ const legend=[item('Fig. 3 | Recruitment of chromatin proteins.',396,477,7,'bold',160),...Array.from({length:39},(_,n)=>item(n===38?'The final caption line.':'Caption explanation continues.',396,467-n*10,7,'body',160))];
+ const r=extractFigureContent([prose,...labels,...legend],595,791,s,8),f=r.figures[0];
+ assert.ok(f.crop);assert.ok(f.crop.x+f.crop.width<396/595);assert.ok(f.crop.y>280/791);assert.ok((f.crop.y+f.crop.height)*791>736);assert.match(f.caption,/final caption line/);assert.deepEqual(r.items,[prose]);
+});
+test('panel geometry excludes running headers and removes diagram fonts with or without subset prefixes',()=>{
+ const s={...styles,label:{fontName:'GraphikNaturel-Regular'},panel:{fontName:'GraphikNaturel-Black'},header:{fontName:'GraphikNaturel-Medium'}};
+ const header=item('Review article',40,740,16,'header',150),outside=item('Box heading retained below the figure.',40,70,7,'label',200);
+ const labels=[item('A',40,671,9.3,'panel',8),item('Panel title',55,671,7,'label',130),item('Chromatin',40,600,6.5,'label',60),item('DNA methylation',200,540,6.5,'label',90)];
+ const r=extractFigureContent([header,...labels,item('Fig. 1 | Diagram caption.',40,500,7,'bold',240),outside],595,791,s,3);
+ assert.ok(r.figures[0].crop.y>100/791);assert.deepEqual(r.items,[header,outside]);
+});

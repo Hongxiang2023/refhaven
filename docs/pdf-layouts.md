@@ -50,3 +50,13 @@ Cache/startup decision: each distinct PDF has one compressed cache, overwritten 
 ## Expanded journal families (layout 15)
 
 See [expanded journal reading views](reading-journal-coverage.md) for the current scope, representative five-journal corpus, retained STAR Methods, shared margin detection, caption corrections, regression results and remaining limitations. Layout 15 supersedes the previous update banner; individual cache refreshes remain explicit.
+
+## Nature Reviews Genetics reading repair (September 2026)
+
+Reader goal: restore the text and figures for “Gene regulatory mechanisms downstream of DNA methylation” (10.1038/s41576-026-01008-3). Scope: first-page abstract/sidebar separation, running-header filtering, and figure crop geometry. The parser uses layout and font evidence rather than an article-title exception. PM/technical owns text integration; figure extraction and notes workspace have separate implementation owners with regression and visual QA.
+
+Acceptance verified against the local 19-page PDF: the abstract is continuous, “Sections” navigation stays out of prose, all five figure captions and crops are retained, and Figure 3's side-caption layout excludes diagram tokens from article text. The five crops were visually reviewed. Cache layout version 19 prompts existing readers to update; notes and highlights are retained. The original PDF is unchanged. The production build and 296 automated tests pass. Tables remain best viewed in the original PDF when faithful grid layout is needed.
+
+### Tight justified text spacing
+
+A follow-up exposed missing spaces in tightly justified Nature Reviews prose. PDF.js supplies explicit zero-height whitespace items, but the line assembler discarded them before estimating word gaps. Layout version 20 uses those items as same-baseline spacing evidence while keeping them out of column and heading detection. Geometric fallback is unchanged for PDFs without explicit spaces. Regression coverage includes the reported sentence, intact kerned words and superscripts, nearby-baseline isolation, gutter whitespace, and empty pages. The actual article now retains “Recent advances in single-cell multi-omic sequencing” and “the spatiotemporal specificity and genetic redundancy of methyl-binding”; all five figure crops remain present. Production build and all 299 tests pass.

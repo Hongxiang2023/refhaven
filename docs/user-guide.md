@@ -268,3 +268,9 @@ If the selected folder is unavailable, restore provider availability before reop
 | AI misses a result | Include the relevant selected passage or figure and verify the original; excerpt selection and model answers can be incomplete. |
 
 Refhaven currently has no built-in cloud sync engine, simultaneous shared-library editing, full-text library search, editable PDF annotation layer, arbitrary BibTeX import, or live Word/Google Docs plugin. Keep a backup and review references and PDF extraction before relying on them for publication.
+
+### Markdown notebook in the PDF reader
+
+Open a paper with **Read PDF**, then choose **Notes** beside **Original PDF** and **Reading view**. Use **Source**, **Split**, or **Preview** to write Markdown and inspect the rendered note. Headings populate the notebook outline. Edits save automatically; the status shows whether a draft has saved. Switching reader tabs keeps the draft available.
+
+The notebook shows your notes folder and a **Copy folder path** button. You can also find it under **Library & connector → Markdown notes**. Open that folder as an Obsidian vault to access the same `.md` files. Each filename includes the paper title and a stable identifying suffix; retain the suffix when renaming a note. If an external edit conflicts with an unsaved Refhaven draft, copy your draft before reloading instead of overwriting the external version.

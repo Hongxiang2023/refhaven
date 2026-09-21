@@ -5,7 +5,7 @@
 <p align="center"><strong>Your papers. Your notes. Your next manuscript.</strong></p>
 <p align="center">A free, local-first reference manager for reading papers and writing manuscripts.</p>
 <p align="center">
-  <a href="https://github.com/Hongxiang2023/refhaven/releases/download/v0.1.7-preview.1/Refhaven-0.1.7-arm64.dmg"><strong>Download for Mac</strong></a> &nbsp;·&nbsp;
+  <a href="https://github.com/Hongxiang2023/refhaven/releases/download/v0.1.8-preview.1/Refhaven-0.1.8-arm64.dmg"><strong>Download for Mac</strong></a> &nbsp;·&nbsp;
   <a href="https://hongxiang2023.github.io/refhaven/demo/">Interactive demo</a> &nbsp;·&nbsp;
   <a href="docs/user-guide.md">User guide</a> &nbsp;·&nbsp;
   <a href="https://hongxiang2023.github.io/refhaven/">Website</a>
@@ -35,7 +35,7 @@ No Refhaven account, subscription, or analytics. Your library is local by defaul
 
 ## Download & install
 
-**[Download Refhaven for Mac · Apple silicon (.dmg)](https://github.com/Hongxiang2023/refhaven/releases/download/v0.1.7-preview.1/Refhaven-0.1.7-arm64.dmg)**
+**[Download Refhaven for Mac · Apple silicon (.dmg)](https://github.com/Hongxiang2023/refhaven/releases/download/v0.1.8-preview.1/Refhaven-0.1.8-arm64.dmg)**
 
 macOS 13 or newer. No Node.js or Terminal needed.
 
@@ -117,3 +117,7 @@ Report problems with your OS, Refhaven version, reproduction steps, and error me
 </details>
 
 Source is [MIT-licensed](LICENSE). Dependencies and citation styles retain their own licenses.
+
+## Codex integration
+
+Refhaven includes a local MCP server and citation workflow plugin for Codex. It searches library metadata, resolves scholarly identifiers, formats citations, and exports Word, BibTeX, or RIS bibliographies. Build the portable plugin with `npm run package:plugin`. See [installation, privacy, and usage](docs/codex-plugin.md).

@@ -21,3 +21,5 @@ connector-token*
 /.agents/
 *.docx
 *.tar.gz
+
+/.playwright-cli/

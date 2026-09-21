@@ -104,6 +104,10 @@ export function analyzePage(items:Item[],pageWidth:number,styles:Record<string,S
   const first=adjacent[0];
   if(first&&adjacent.filter(i=>i.fontName===first.fontName&&Math.abs(i.transform[4]-first.transform[4])<2).length>=3){dropCaps.set(first,{...first,str:cap.str+first.str,transform:[...first.transform.slice(0,4),cap.transform[4],first.transform[5]],width:first.transform[4]+first.width-cap.transform[4]});removedCaps.add(cap);}
  }
+ // PDF.js may encode justified word separators as zero-height space runs.
+ // Keep them as joining evidence even though they must not establish lines,
+ // columns, font sizes, or headings themselves.
+ const spaces=items.filter(i=>i.str.length>0&&!i.str.trim());
  const content=items.filter(i=>i.str.trim()&&!removedCaps.has(i)).map(i=>dropCaps.get(i)||i),splits=readingColumnSplits(content,pageWidth,options);
  const columns=splits.length+1,normalColumn=(x:number)=>splits.filter(s=>x>=s).length;
  const crosses=(i:Item)=>splits.some(s=>i.transform[4]<s&&i.transform[4]+i.width>s+8);
@@ -147,7 +151,22 @@ export function analyzePage(items:Item[],pageWidth:number,styles:Record<string,S
   if(gap>Math.min(left.height,right.height)*.6)continue;
   left.items.push(...right.items);left.x=Math.min(left.x,right.x);left.end=Math.max(left.end,right.end);lines.splice(b--,1);
  }
- for(const line of lines){let end=line.x,prefixEnd=0,prefixOpen=true;line.items.sort((a,b)=>a.transform[4]-b.transform[4]);for(const item of line.items){const raw=item.str;const raised=item.height<line.height*.85&&item.transform[5]-line.y>line.height*.15;const numeric=/^[+−-]?\d+(?:\s*[,–−-]\s*\d+)*\s*$/.test(raw);const text=raised&&numeric?raw.replace(/[0-9+−–-]/g,c=>({'-':'⁻','−':'⁻','–':'⁻','+':'⁺'}[c]||'⁰¹²³⁴⁵⁶⁷⁸⁹'[Number(c)])):raw;line.text+=(line.text&&!/\s$/.test(line.text)&&!/^\s/.test(text)&&item.transform[4]-end>line.height*.12?' ':'')+text;end=item.transform[4]+item.width;if(prefixOpen&&isBold(item))prefixEnd=line.text.length;else if(item.str.trim())prefixOpen=false;}line.boldPrefix=line.text.slice(0,prefixEnd).trim();}
+ for(const line of lines){
+  let end=line.x,prefixEnd=0,prefixOpen=true;
+  line.items.sort((a,b)=>a.transform[4]-b.transform[4]);
+  for(const item of line.items){
+   const raw=item.str;
+   const raised=item.height<line.height*.85&&item.transform[5]-line.y>line.height*.15;
+   const numeric=/^[+−-]?\d+(?:\s*[,–−-]\s*\d+)*\s*$/.test(raw);
+   const text=raised&&numeric?raw.replace(/[0-9+−–-]/g,c=>({'-':'⁻','−':'⁻','–':'⁻','+':'⁺'}[c]||'⁰¹²³⁴⁵⁶⁷⁸⁹'[Number(c)])):raw;
+   const gap=item.transform[4]-end;
+   const explicitSpace=gap>=-.1&&spaces.some(s=>Math.abs(s.transform[5]-line.y)<Math.max(1,line.height*.2)&&s.transform[4]>=end-.1&&s.transform[4]+s.width<=item.transform[4]+.1);
+   line.text+=(line.text&&!/\s$/.test(line.text)&&!/^\s/.test(text)&&(explicitSpace||gap>line.height*.12)?' ':'')+text;
+   end=item.transform[4]+item.width;
+   if(prefixOpen&&isBold(item))prefixEnd=line.text.length;else if(item.str.trim())prefixOpen=false;
+  }
+  line.boldPrefix=line.text.slice(0,prefixEnd).trim();
+ }
  lines.sort((a,b)=>b.y-a.y||a.x-b.x);
  const ordered:Line[]=[];let band:Line[]=[];
  const flush=(through=columns-1)=>{for(let col=0;col<=through;col++)ordered.push(...band.filter(l=>l.column===col));band=band.filter(l=>l.column>through);};
