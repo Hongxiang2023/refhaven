@@ -22,6 +22,10 @@ export function extractFigureContent(items:Item[],width:number,height:number,sty
   return bold&&title?{...i,str:i.str+'.'}:i;
  });
  const removed=new Set<Item>();const figures:ReadingFigure[]=[];
+ const panelLabels=items.filter(i=>/^[A-E]$/.test(i.str.trim())&&Math.abs(i.height)>7&&(/(?:Arial-Bold|Helvetica.*Bold)/i.test(styles[i.fontName||'']?.fontName||'')||!styles[i.fontName||'']?.fontName&&Math.abs(i.height)>7.4));
+ const panelTop=Math.max(0,...panelLabels.map(i=>i.transform[5]));
+ const panelLetters=new Set(panelLabels.filter(i=>i.transform[5]>height*.35).map(i=>i.str.trim()));
+ const hasPanelGrid=['A','B','C'].every(letter=>panelLetters.has(letter))&&panelTop>height*.8;
  // Some publishers place a complete legend on the following prose page, or
  // continue its panel descriptions beneath that page's article columns.
  const previous=[...previousFigures].reverse().find(f=>f.page===page-1&&awaitingContinuation.has(f));
@@ -52,6 +56,17 @@ export function extractFigureContent(items:Item[],width:number,height:number,sty
    const figure:ReadingFigure={page,label:'Figure',caption:'',crop:{x:Math.min(x,.075),y,width:Math.max(right,.925)-Math.min(x,.075),height:bottom-y}};
    unnamedFigures.add(figure);figures.push(figure);removed.add(barePlaceholder);
    for(const i of items)if(i.transform[4]>=Math.min(x,.075)*width&&i.transform[4]+i.width<=Math.max(right,.925)*width&&height-i.transform[5]>=y*height&&height-i.transform[5]<=bottom*height)removed.add(i);
+  }
+ }
+ // Nature Communications can put the artwork on one page and its complete
+ // legend at the top of the next, without a "legend on next page" marker.
+ if(!barePlaceholder&&hasPanelGrid&&!items.some(i=>start.test(i.str.trim()))){
+  const bottomLabel=Math.min(...panelLabels.filter(i=>i.transform[5]>height*.35).map(i=>i.transform[5]));
+  const body=items.filter(i=>i.str.trim().length>40&&i.transform[5]<bottomLabel-40&&i.transform[5]>25&&Math.abs(i.height)>7.5);
+  if(body.length>=3){
+   const bodyTop=Math.max(...body.map(i=>i.transform[5]+Math.abs(i.height)));
+   const top=Math.max(30,height-panelTop-24),bottom=height-bodyTop-12;
+   if(bottom-top>height*.35){const figure:ReadingFigure={page,label:'Figure',caption:'',crop:{x:.055,y:top/height,width:.89,height:(bottom-top)/height}};unnamedFigures.add(figure);figures.push(figure);}
   }
  }
  const seeds=items.filter(i=>{
@@ -105,12 +120,30 @@ export function extractFigureContent(items:Item[],width:number,height:number,sty
   }
   figures.push({page,label,caption:isPlaceholder?'':caption,captionPage:isPlaceholder?undefined:page,...(crop?{crop}: {})});
  }
+ // Some Nature Methods figures occupy an entire page, with lowercase panel
+ // letters and the numbered legend at the top of the following page. Their
+ // chart labels are text objects, so leaving this page as prose is misleading.
+ if(!figures.length){
+  const panels=items.filter(i=>/^[a-k]$/.test(i.str.trim())&&Math.abs(i.height)>8&&i.transform[5]>height*.12&&i.transform[5]<height*.94);
+  const letters=new Set(panels.map(i=>i.str.trim()));
+  const prose=items.filter(i=>i.str.trim().length>45&&i.transform[5]>height*.06&&i.transform[5]<height*.94);
+  if(panels.length>=8&&letters.has('a')&&letters.has('b')&&letters.has('c')&&letters.has('d')&&prose.length===0){
+   const top=Math.max(35,height-Math.max(...panels.map(i=>i.transform[5]))-14);
+   const bottom=Math.min(height-45,height-Math.min(...items.filter(i=>i.str.trim()&&i.transform[5]>height*.06).map(i=>i.transform[5]))+12);
+   const figure:ReadingFigure={page,label:'Figure',caption:'',crop:{x:.065,y:top/height,width:.87,height:(bottom-top)/height}};
+   unnamedFigures.add(figure);figures.push(figure);
+   for(const i of items)if(i.transform[5]>height*.06&&i.transform[5]<height*.94)removed.add(i);
+  }
+ }
  return {items:items.filter(i=>!removed.has(i)),figures};
 }
 // Layout evidence, rather than a publisher name, permits full caption extraction.
 // A separately typeset label or smaller caption type distinguishes it from prose.
 function extractGenericCaption(items:Item[],seed:Item,seeds:Item[],width:number,height:number,styles:Record<string,Style>,page:number,graphics:GraphicBox[]){
  const size=Math.abs(seed.height),y=seed.transform[5],x=seed.transform[4];
+ const artworkLabels=items.filter(i=>/^[A-E]$/.test(i.str.trim())&&Math.abs(i.height)>7&&(/(?:Arial-Bold|Helvetica.*Bold)/i.test(styles[i.fontName||'']?.fontName||'')||!styles[i.fontName||'']?.fontName&&Math.abs(i.height)>7.4));
+ const panelLetters=new Set(artworkLabels.filter(i=>i.transform[5]>height*.35).map(i=>i.str.trim()));
+ const hasPanelGrid=['A','B','C'].every(letter=>panelLetters.has(letter))&&artworkLabels.some(i=>i.transform[5]>height*.8);
  const panelBelow=items.find(i=>panelStart.test(i.str.trim())&&y-i.transform[5]>size*.8&&y-i.transform[5]<size*1.7&&Math.abs(i.height)>=size*.85&&Math.abs(i.height)<=size);
  const captionSize=panelBelow?Math.abs(panelBelow.height):size;
  const sameLine=items.filter(i=>i.str.trim()&&Math.abs(i.transform[5]-y)<size*.3&&i.transform[4]>=x-2);
@@ -140,7 +173,11 @@ function extractGenericCaption(items:Item[],seed:Item,seeds:Item[],width:number,
     if(line.length&&Math.abs(i.height)<=size*1.05&&i.transform[4]>=Math.min(...line.map(s=>s.transform[4]))&&i.transform[4]+i.width<=Math.max(...line.map(s=>s.transform[4]+s.width))+1&&!selected.includes(i))selected.push(i);
    }
    const caption=analyzePage(selected,width,styles,{minColumnLines:2}).paragraphs.join(' ').replace(/\s+/g,' ').trim();
-   return {selected,figure:{page,label:seed.str.trim().match(start)![1],caption,captionPage:page} as ReadingFigure};
+   const upperPanels=artworkLabels.filter(i=>i.transform[5]>y+size*3);
+   const top=height-Math.max(0,...upperPanels.map(i=>i.transform[5]))-24;
+   const bottom=height-y-size-5;
+   const crop=hasPanelGrid&&upperPanels.length>=3&&bottom-top>50?{x:.055,y:Math.max(0,top/height),width:.89,height:(bottom-top)/height}:undefined;
+   return {selected,figure:{page,label:seed.str.trim().match(start)![1],caption,captionPage:page,...(crop?{crop}:{})} as ReadingFigure};
   }
  }
  const half=width/2;

@@ -5,16 +5,19 @@ import './papers.css';
 import Manuscript from './Manuscript';
 import ReadingView from './ReadingView';
 import LibraryStorage from './LibraryStorage';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {referenceUrl,citationDoi} from '../server/reference-links.mjs';
 
 function Notes({paper,onSave}:{paper:Paper;onSave:(value:string,expected:string)=>Promise<void>}){
  const [text,setText]=useState(paper.notes),[state,setState]=useState('Saved');
+ const [mode,setMode]=useState<'edit'|'preview'>('edit');
  const dirty=useRef(false), inFlight=useRef(0), timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined),latest=useRef(paper.notes),baseline=useRef(paper.notes),saveRef=useRef(onSave),sequence=useRef(0),sent=useRef(-1);
  useEffect(()=>{saveRef.current=onSave;},[onSave]);
  useEffect(()=>{if(!dirty.current&&!inFlight.current){setText(paper.notes);latest.current=paper.notes;baseline.current=paper.notes;}},[paper.notes]);
  const flush=useCallback(()=>{if(!dirty.current||sent.current===sequence.current)return;const version=sequence.current,value=latest.current,expected=baseline.current;sent.current=version;inFlight.current++;void saveRef.current(value,expected).then(()=>{baseline.current=value;if(sequence.current===version){dirty.current=false;setState('Saved');}}).catch(()=>{if(sequence.current===version){dirty.current=true;sent.current=-1;setState('Not saved — note changed elsewhere. Copy your draft before reloading.');}}).finally(()=>{inFlight.current--;});},[]);
  useEffect(()=>{const guard=(event:BeforeUnloadEvent)=>{if(dirty.current||inFlight.current){flush();event.preventDefault();event.returnValue='';}};window.addEventListener('beforeunload',guard);return()=>{window.removeEventListener('beforeunload',guard);clearTimeout(timer.current);flush();};},[flush]);
- return <label className="folio-field">Reading notes<textarea aria-label="Reading notes" placeholder="Ideas, questions, and useful passages…" value={text} onBlur={flush} onChange={e=>{setText(e.target.value);latest.current=e.target.value;dirty.current=true;sequence.current++;setState('Saving…');clearTimeout(timer.current);timer.current=setTimeout(flush,500);}}/><small>{state} · Markdown file in your library’s notes folder</small></label>;
+ return <section className="folio-field folio-notes"><div className="folio-notes-head"><strong>Reading notes</strong><div role="group" aria-label="Reading notes display"><button type="button" aria-pressed={mode==='edit'} onClick={()=>setMode('edit')}>Edit</button><button type="button" aria-pressed={mode==='preview'} onClick={()=>{flush();setMode('preview');}}>Preview</button></div></div>{mode==='edit'?<textarea aria-label="Reading notes" placeholder="Ideas, questions, and useful passages…" value={text} onBlur={flush} onChange={e=>{setText(e.target.value);latest.current=e.target.value;dirty.current=true;sequence.current++;setState('Saving…');clearTimeout(timer.current);timer.current=setTimeout(flush,500);}}/>:<div className="folio-notes-preview" aria-label="Rendered reading notes">{text.trim()?<ReactMarkdown remarkPlugins={[remarkGfm]} components={{a:({children,...props})=><a {...props} target="_blank" rel="noopener noreferrer">{children}</a>}}>{text}</ReactMarkdown>:<p className="folio-notes-empty">No reading notes yet. Choose Edit to start writing.</p>}</div>}<small>{state} · Markdown file in your library’s notes folder</small></section>;
 }
 function Modal({title,onClose,children,busy=false}:{title:string;onClose:()=>void;children:React.ReactNode;busy?:boolean}){
  const node=useRef<HTMLDivElement>(null);

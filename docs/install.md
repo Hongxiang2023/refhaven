@@ -21,7 +21,7 @@ Choose **Apple menu → About This Mac**. A **Chip** entry with an Apple M-serie
 
 ### Download and install
 
-1. **[Download Refhaven-0.1.5-arm64.dmg](https://github.com/Hongxiang2023/refhaven/releases/download/v0.1.5-preview.1/Refhaven-0.1.5-arm64.dmg)** from this project's GitHub release.
+1. **[Download Refhaven-0.1.5-arm64.dmg](https://github.com/Hongxiang2023/refhaven/releases/download/v0.1.7-preview.1/Refhaven-0.1.7-arm64.dmg)** from this project's GitHub release.
 2. Double-click the downloaded DMG. A disk-image window opens.
 3. Drag **Refhaven** to **Applications**. If you already have Refhaven installed, quit it and back up your library before replacing the app.
 4. Open **Applications → Refhaven**. Run the installed copy rather than leaving the application inside the disk image.

@@ -5,7 +5,7 @@
 <p align="center"><strong>Your papers. Your notes. Your next manuscript.</strong></p>
 <p align="center">A free, local-first reference manager for reading papers and writing manuscripts.</p>
 <p align="center">
-  <a href="https://github.com/Hongxiang2023/refhaven/releases/download/v0.1.5-preview.1/Refhaven-0.1.5-arm64.dmg"><strong>Download for Mac</strong></a> &nbsp;·&nbsp;
+  <a href="https://github.com/Hongxiang2023/refhaven/releases/download/v0.1.7-preview.1/Refhaven-0.1.7-arm64.dmg"><strong>Download for Mac</strong></a> &nbsp;·&nbsp;
   <a href="https://hongxiang2023.github.io/refhaven/demo/">Interactive demo</a> &nbsp;·&nbsp;
   <a href="docs/user-guide.md">User guide</a> &nbsp;·&nbsp;
   <a href="https://hongxiang2023.github.io/refhaven/">Website</a>
@@ -35,7 +35,7 @@ No Refhaven account, subscription, or analytics. Your library is local by defaul
 
 ## Download & install
 
-**[Download Refhaven for Mac · Apple silicon (.dmg)](https://github.com/Hongxiang2023/refhaven/releases/download/v0.1.5-preview.1/Refhaven-0.1.5-arm64.dmg)**
+**[Download Refhaven for Mac · Apple silicon (.dmg)](https://github.com/Hongxiang2023/refhaven/releases/download/v0.1.7-preview.1/Refhaven-0.1.7-arm64.dmg)**
 
 macOS 13 or newer. No Node.js or Terminal needed.
 

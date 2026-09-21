@@ -9,6 +9,33 @@ const code=compile(await readFile(new URL('../src/figure-extraction.ts',import.m
 const {extractFigureContent,mergeExtractedFigures}=await import(data(code));
 const styles={body:{fontName:'HardingText-Regular'},bold:{fontName:'HardingText-Bold'},label:{fontName:'ABCDEF+GraphikNaturel-Regular'}};
 const item=(str,x,y,height=7,fontName='body',width=240)=>({str,transform:[1,0,0,1,x,y],height,fontName,width});
+test('lowercase full-page panels link to a numbered legend on the next page',()=>{
+ const panels='abcdefghijk'.split('').map((letter,n)=>item(letter,105+(n%4)*110,730-Math.floor(n/4)*220,9.3,'panel',7));
+ const labels=['H3K27me3','WNN','Gene expression (RNA)'].map((s,n)=>item(s,130+n*90,690-n*300,6.5,'chart',75));
+ const first=extractFigureContent([...panels,...labels],595,791,{panel:{fontName:'Graphik-Semibold'},chart:{fontName:'Graphik-Regular'}},7);
+ assert.equal(first.figures.length,1);assert.deepEqual(first.items,[]);
+ assert.ok(first.figures[0].crop.y+first.figures[0].crop.height>.8);
+ const next=extractFigureContent([item('Fig. 4 | Spatial mapping of RNA in mouse brain.',40,736,7,'caption',340)],595,791,{caption:{fontName:'HardingText-Bold'}},8);
+ mergeExtractedFigures(first.figures,next.figures);
+ assert.equal(first.figures.length,1);assert.equal(first.figures[0].label,'Fig. 4');assert.equal(first.figures[0].captionPage,8);
+});
+test('Nature Communications panel artwork links to a legend on the following page',()=>{
+ const s={panel:{fontName:'Arial-BoldMT'},caption:{fontName:'AdvOT3d287b35.B'},body:{fontName:'AdvOTdd63dae3'}};
+ const panels=['A','B','C','D','E'].map((letter,n)=>item(letter,n%2?305:81,732-Math.floor(n/2)*210,11.47,'panel',9));
+ const prose=[114,103,92].map(y=>item('Scientific prose resumes below the artwork on this page.',40,y,8.2,'body',250));
+ const artwork=extractFigureContent([...panels,...prose],595,791,s,8);
+ assert.equal(artwork.figures.length,1);assert.equal(artwork.figures[0].page,8);assert.ok(artwork.figures[0].crop.y+artwork.figures[0].crop.height<(791-114)/791);
+ const legend=extractFigureContent([item('Fig. 5 | Epigenetic age predictions in blood.',40,736,6.97,'caption',250),item('A The violin plots show single-cell age estimates.',40,726,6.97,'caption',250)],595,791,s,9);
+ const figures=[...artwork.figures];mergeExtractedFigures(figures,legend.figures);
+ assert.equal(figures.length,1);assert.equal(figures[0].label,'Fig. 5');assert.equal(figures[0].page,8);assert.equal(figures[0].captionPage,9);
+});
+test('Nature Communications captions crop artwork without prose beneath it',()=>{
+ const s={panel:{fontName:'Arial-BoldMT'},caption:{fontName:'AdvOT3d287b35.B'},body:{fontName:'AdvOTdd63dae3'}};
+ const panels=['A','B','C','D'].map((letter,n)=>item(letter,n%2?305:65,730-Math.floor(n/2)*150,9,'panel',8));
+ const prose=[390,379,368].map(y=>item('Article body text continues below the figure legend.',40,y,8.2,'body',250));
+ const r=extractFigureContent([...panels,item('Fig. 2 | Overview of the modelling setup.',40,464,6.97,'caption',240),item('A The first panel describes the training data.',40,454,6.97,'caption',250),...prose],595,791,s,4);
+ assert.ok(r.figures[0].crop);assert.ok((r.figures[0].crop.y+r.figures[0].crop.height)*791<791-464-6.97);assert.ok(r.items.some(i=>i===prose[0]));
+});
 test('next-page placeholder links full two-column legend to original figure',()=>{
  const first=extractFigureContent([item('Fig. 2 |',40,100,7,'bold'),item('See next page for caption.',70,100),item('Narrative remains below the figure and is not part of its caption.',40,70,8.25)],595,792,styles,3);
  assert.equal(first.items.length,1);assert.equal(first.figures[0].caption,'');assert.ok(first.figures[0].crop);

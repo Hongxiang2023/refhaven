@@ -1,6 +1,6 @@
 {
   "name": "refhaven-reference-manager",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "description": "A free, local-first reference manager for reading papers and writing manuscripts",
   "private": true,
   "type": "module",
@@ -25,7 +25,9 @@
     "jszip": "3.10.1",
     "pdfjs-dist": "6.3.289",
     "react": "19.2.6",
-    "react-dom": "19.2.6"
+    "react-dom": "19.2.6",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@types/node": "22.19.19",
